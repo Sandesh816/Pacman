@@ -24,11 +24,12 @@ from util import PriorityQueueWithFunction
 
 
 class Node:  # No need to declare field variables outside constructor like in java
-    def __init__(self, _current=None, _parent=None, _lastAction=None, _previousCost = 0):
+    def __init__(self, _current=None, _parent=None, _lastAction=None, _previousCost = 0, _cumulativeCost = 0):
         self.current = _current  # state
         self.parent = _parent  # state
         self.lastAction = _lastAction  # action took (direction)
         self.previousCost = _previousCost
+        self.cumulativeCost = _cumulativeCost # added for UCS amongst others
 class SearchProblem:
 
     """
@@ -135,11 +136,9 @@ def breadthFirstSearch(problem):
     currentNode = Node(_current = start)
     nodeQueue.push(currentNode)
     visited = set()
-
     while not nodeQueue.isEmpty():
         currentNode = nodeQueue.pop()
         currentState = currentNode.current
-
         if problem.isGoalState(currentState):
             actions = []
             while currentNode.parent is not None:  # we go back up to the initial state
@@ -158,21 +157,12 @@ def breadthFirstSearch(problem):
     return None
 
 def uniformCostSearch(problem):
-    def giveCost(node):
-        actions = []
-        current = node
-        while current.parent is not None:
-            actions.append(current.lastAction)
-            current = current.parent
-        actions.reverse()
-        return problem.getCostOfActions(actions)
-    """Search the node of least total cost first."""
     start = problem.getStartState()
-    # heap = PriorityQueueWithFunction(lambda node: node.previousCost)
-    heap = PriorityQueueWithFunction(giveCost)
+    heap = PriorityQueueWithFunction(lambda node: node.cumulativeCost)
+    # heap = PriorityQueueWithFunction(giveCost)
     currentNode = Node(_current = start)
     heap.push(currentNode)
-    visited = set()
+    visited = {}
 
     while not heap.isEmpty():
         currentNode = heap.pop()
@@ -186,11 +176,11 @@ def uniformCostSearch(problem):
             actions.reverse()  # to get from the start
             return actions
 
-        if currentState not in visited:
-            visited.add(currentState)
+        if currentState not in visited or currentNode.cumulativeCost < visited[currentState]:
+            visited[currentState] = currentNode.cumulativeCost
             successors = problem.getSuccessors(currentState)  # Tuple: (nextState, action, cost)
             for successor in successors:  # successor: state, action, cost
-                newNode = Node(_current=successor[0], _parent=currentNode, _lastAction=successor[1], _previousCost= currentNode.previousCost + successor[2])
+                newNode = Node(_current=successor[0], _parent=currentNode, _lastAction=successor[1], _cumulativeCost= currentNode.cumulativeCost + successor[2])
                 heap.push(newNode)
 
     print("Could not find the goal state")
@@ -206,7 +196,32 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    start = problem.getStartState()
+    heap = PriorityQueueWithFunction(lambda node: node.cumulativeCost + heuristic(node.current, problem))
+    currentNode = Node(_current = start)
+    heap.push(currentNode)
+    visited = {}
+    while not heap.isEmpty():
+        currentNode = heap.pop()
+        currentState = currentNode.current
+
+        if problem.isGoalState(currentState):
+            actions = []
+            while currentNode.parent is not None:  # we go back up to the initial state
+                actions.append(currentNode.lastAction)
+                currentNode = currentNode.parent
+            actions.reverse()  # to get from the start
+            return actions
+
+        if currentState not in visited or currentNode.cumulativeCost < visited[currentState]:
+            visited[currentState] = currentNode.cumulativeCost
+            successors = problem.getSuccessors(currentState)  # Tuple: (nextState, action, cost)
+            for successor in successors:  # successor: state, action, cost
+                newNode = Node(_current=successor[0], _parent=currentNode, _lastAction=successor[1], _cumulativeCost= currentNode.cumulativeCost + successor[2])
+                heap.push(newNode)
+
+    print("Could not find the goal state")
+    return None
 
 
 # Abbreviations
