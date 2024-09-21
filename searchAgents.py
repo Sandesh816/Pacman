@@ -301,21 +301,31 @@ class CornersProblem(search.SearchProblem):
         """
         # state: (startingPosition, cornersVisited, previousPositions)
         startingPosition = self.startingPosition
-        cornersVisited = set() # a new set. we will keep filling it when we reach corners
-        previousPositions = set(startingPosition)
+        #cornersVisited = set() # a new set. we will keep filling it when we reach corners
+        #previousPositions = set(startingPosition)
 
-        if startingPosition in self.corners:
-            cornersVisited.add(startingPosition)
+        #if startingPosition in self.corners:
+        #    cornersVisited.add(startingPosition)
+        #cornersVisited = tuple([False] * 4)
+        cornersVisited = (False,False,False,False)
 
-        return (startingPosition, cornersVisited, previousPositions)
+        return (startingPosition, cornersVisited)
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         # For this Corners Problem, our goal will be fulfilled once we reach all four corners
-        numCornersVisited = len(state[1])
-        return numCornersVisited == 4
+        #numCornersVisited = len(state[1])
+        #return numCornersVisited == 4
+        #if state.cornersVisited == (True,True,True,True):
+        #    return True
+        #return False
+        startingPosition, cornersVisited = state
+        for _ in cornersVisited:
+            if _ != True:
+                return False
+        return True
 
     def getSuccessors(self, state):
         """
@@ -329,7 +339,7 @@ class CornersProblem(search.SearchProblem):
         """
 
         successors = []
-        currentPosition, cornersVisited, previousPositions = state
+        currentPosition, cornersVisited = state
 
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
             # Add a successor state to the successor list if the action is legal
@@ -345,13 +355,14 @@ class CornersProblem(search.SearchProblem):
             newX, newY = int(x + dx), int(y + dy)
             newPosition = newX, newY
             if not self.walls[newX][newY]:#check: if we don't hit a wall
-                if newPosition not in previousPositions:#if not visited this position already
-                    newPreviousPositions = previousPositions.add(newPosition)
-                    newCornersVisited = cornersVisited
-                    if newPosition in self.corners:
-                        newCornersVisited.add(newPosition)
-                    newState = (newPosition, newCornersVisited, newPreviousPositions)
-                    successors.add(newState, action, 1) # action = current_action and cost = 1
+                #if newPosition not in previousPositions:#if not visited this position already
+                    #newPreviousPositions = previousPositions.add(newPosition)
+                newCornersVisited = list(cornersVisited)
+                if newPosition in self.corners:
+                    #newCornersVisited.add(newPosition)
+                    newCornersVisited[self.corners.index(newPosition)] = True
+                newState = (newPosition, tuple(newCornersVisited))
+                successors.append((newState, action, 1)) # action = current_action and cost = 1
 
         self._expanded += 1 # DO NOT CHANGE
         return successors
