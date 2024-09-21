@@ -106,7 +106,6 @@ def depthFirstSearch(problem): # return -> list of actions to take from the star
     currentNode = Node(_current= start)
     nodeStack.push(currentNode)
     visited = set()
-
     while not nodeStack.isEmpty():
         currentNode = nodeStack.pop()
         currentState = currentNode.current
@@ -222,7 +221,6 @@ def aStarSearch(problem, heuristic=nullHeuristic):
 
     print("Could not find the goal state")
     return None
-
 
 # Abbreviations
 bfs = breadthFirstSearch
