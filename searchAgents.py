@@ -402,6 +402,7 @@ def cornersHeuristic(state, problem):
     if not unvisitedCorners:
         return 0
     distances = [abs(pacmanPosition[0] - corner[0]) + abs(pacmanPosition[1] - corner[1]) for corner in unvisitedCorners]
+    # min(distance) <- not do this
     return max(distances)
 
 class AStarCornersAgent(SearchAgent):
