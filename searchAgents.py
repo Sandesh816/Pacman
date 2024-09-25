@@ -396,7 +396,6 @@ def cornersHeuristic(state, problem):
     """
     corners = problem.corners # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
-    "*** YOUR CODE HERE ***"
     pacmanPosition, cornersVisited = state # tuple
     unvisitedCorners = [corners[i] for i in range(4) if cornersVisited[i] == False]
     if not unvisitedCorners:
@@ -496,8 +495,11 @@ def foodHeuristic(state, problem):
     problem.heuristicInfo['wallCount']
     """
     position, foodGrid = state
-    "*** YOUR CODE HERE ***"
-    return 0
+    if foodGrid.count() == 0:
+        return 0
+    foodPositions = [(x, y) for x in range(foodGrid.width) for y in range(foodGrid.height) if foodGrid[x][y]]
+    distances = [abs(position[0] - foodPos[0]) + abs(position[1] - foodPos[1]) for foodPos in foodPositions]
+    return max(distances)
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
@@ -527,8 +529,21 @@ class ClosestDotSearchAgent(SearchAgent):
         walls = gameState.getWalls()
         problem = AnyFoodSearchProblem(gameState)
 
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        bfsSolution = search.breadthFirstSearch(problem)
+        dfsSolution = search.depthFirstSearch(problem)
+        ucsSolution = search.uniformCostSearch(problem)
+        aStarSolution = search.aStarSearch(problem)
+
+        minLength = min(len(bfsSolution), len(dfsSolution), len(ucsSolution), len(aStarSolution))
+        if minLength == len(bfsSolution):
+            return bfsSolution
+        elif minLength == len(dfsSolution):
+            return dfsSolution
+        elif minLength == len(ucsSolution):
+            return ucsSolution
+        return aStarSolution
+
+
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
@@ -562,9 +577,8 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         complete the problem definition.
         """
         x,y = state
+        return self.food[x][y]
 
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
 
 def mazeDistance(point1, point2, gameState):
     """

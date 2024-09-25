@@ -194,7 +194,6 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
     start = problem.getStartState()
     heap = PriorityQueueWithFunction(lambda node: node.cumulativeCost + heuristic(node.current, problem))
     currentNode = Node(_current = start)
