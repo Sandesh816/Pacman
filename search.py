@@ -101,31 +101,55 @@ def depthFirstSearch(problem): # return -> list of actions to take from the star
 
     HINT: Start by defining a Node class
     """
-    start = problem.getStartState() # state: position, cornersVisited, prevPositions
-    nodeStack = Stack()
-    currentNode = Node(_current= start)
-    nodeStack.push(currentNode)
-    visited = set()
-    while not nodeStack.isEmpty():
-        currentNode = nodeStack.pop()
-        currentState = currentNode.current
+    #start = problem.getStartState() # state: position, cornersVisited, prevPositions
+    # nodeStack = Stack()
+    # currentNode = Node(_current= start)
+    # nodeStack.push(currentNode)
+    # visited = set()
+    # while not nodeStack.isEmpty():
+    #    currentNode = nodeStack.pop()
+    #    currentState = currentNode.current
 
+    #    if problem.isGoalState(currentState):
+    #        actions = []
+    #        while currentNode.parent is not None:  # we go back up to the initial state
+    #            actions.append(currentNode.lastAction)
+    #            currentNode = currentNode.parent
+    #        actions.reverse()# to get from the start
+    #        return actions
+
+    #    if currentState not in visited:
+    #        visited.add(currentState)
+    #        successors = problem.getSuccessors(currentState) # Tuple: (nextState, action, cost)
+    #        for successor in successors:#successor: state, action, cost
+    #            newNode = Node(_current= successor[0], _parent= currentNode, _lastAction= successor[1])
+    #            nodeStack.push(newNode)
+
+    #print("Could not find the goal state")
+    #return None
+
+    start = problem.getStartState()
+    stack = Stack()
+    stack.push(Node(_current=start))
+    reached = {start}
+    while not stack.isEmpty():
+        currentNode = stack.pop()
+        currentState = currentNode.current
         if problem.isGoalState(currentState):
             actions = []
-            while currentNode.parent is not None:  # we go back up to the initial state
+            while currentNode.parent is not None:
                 actions.append(currentNode.lastAction)
                 currentNode = currentNode.parent
-            actions.reverse()# to get from the start
-            return actions
+            return list(reversed(actions))
+        successors = problem.getSuccessors(currentState)
+        for successor in successors:
+            current = successor[0]
+            action = successor[1]
+            child = Node(_current=current, _parent=currentNode, _lastAction=action)
+            if current not in reached:
+                reached.add(current)
+                stack.push(child)
 
-        if currentState not in visited:
-            visited.add(currentState)
-            successors = problem.getSuccessors(currentState) # Tuple: (nextState, action, cost)
-            for successor in successors:#successor: state, action, cost
-                newNode = Node(_current= successor[0], _parent= currentNode, _lastAction= successor[1])
-                nodeStack.push(newNode)
-
-    print("Could not find the goal state")
     return None
 
 def breadthFirstSearch(problem):
@@ -194,7 +218,6 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
     start = problem.getStartState()
     heap = PriorityQueueWithFunction(lambda node: node.cumulativeCost + heuristic(node.current, problem))
     currentNode = Node(_current = start)
