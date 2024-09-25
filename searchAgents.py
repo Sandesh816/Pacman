@@ -395,14 +395,12 @@ def cornersHeuristic(state, problem):
     admissible (as well as consistent).
     """
     corners = problem.corners # These are the corner coordinates
-    walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
     pacmanPosition, cornersVisited = state # tuple
     unvisitedCorners = [corners[i] for i in range(4) if cornersVisited[i] == False]
     if not unvisitedCorners:
         return 0
     distances = [abs(pacmanPosition[0] - corner[0]) + abs(pacmanPosition[1] - corner[1]) for corner in unvisitedCorners]
-    # min(distance) <- not do this
-    return max(distances)
+    return max(distances) #using min leads to more nodes expanded and using sum leads to inadmissible heuristic
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -495,11 +493,19 @@ def foodHeuristic(state, problem):
     problem.heuristicInfo['wallCount']
     """
     position, foodGrid = state
-    if foodGrid.count() == 0:
-        return 0
-    foodPositions = [(x, y) for x in range(foodGrid.width) for y in range(foodGrid.height) if foodGrid[x][y]]
-    distances = [abs(position[0] - foodPos[0]) + abs(position[1] - foodPos[1]) for foodPos in foodPositions]
-    return max(distances)
+    starting = problem.startingGameState
+    foodList = foodGrid.asList()
+    result = 0 # initially, our hwuristic = 0
+
+    for food in foodList:
+        distance = mazeDistance(position, food, starting)
+        result = max(distance, result)
+    # if len(foodList) == 0:
+    #     return result
+    # foodPositions = [(x, y) for x in range(foodGrid.width) for y in range(foodGrid.height) if foodGrid[x][y]]
+    # distances = [abs(position[0] - foodPos[0]) + abs(position[1] - foodPos[1]) for foodPos in foodPositions]
+    # return max(distances)
+    return result
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
@@ -542,8 +548,6 @@ class ClosestDotSearchAgent(SearchAgent):
         elif minLength == len(ucsSolution):
             return ucsSolution
         return aStarSolution
-
-
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
